@@ -1,0 +1,37 @@
+train:
+  seed: 42
+  batch_size: 256
+  max_steps: 500_000  # for 8 GPUs
+  limit_val_batches: 32
+  val_check_interval: 1000
+  log_every_n_steps: 100
+  gradient_clip_val: 5.
+  lr_warmup_steps: 1000
+  ema_decay: 0.9999
+  optimizer:
+    type: adamw
+    lr: 1.e-4
+    weight_decay: 0.1
+    beta1: 0.9
+    beta2: 0.999
+  scheduler:
+    type: plateau
+    factor: 0.8
+    patience: 5
+    min_lr: 1.e-5
+
+datasets:
+  type: bmnist
+  root: ./data/bmnist
+
+model:
+  type: sphere
+  data_dims: [ 28, 28 ]
+  n_class: 2
+  ot: true
+encoder:
+  type: cnn
+
+sample:
+  n_step: 200
+  n_sample: 100
