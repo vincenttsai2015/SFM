@@ -3,6 +3,7 @@ from .categorical import SimplexCategoricalFlow, SphereCategoricalFlow, LinearCa
 from .cnn import ConvNet
 from .seq_model import SeqNet
 from .transformer import GPT
+from .mlp import ThreeLayerMLP, ThreeLayerMLP_with_dropout, VelocityMLP
 
 try:
     from .dit import DiT

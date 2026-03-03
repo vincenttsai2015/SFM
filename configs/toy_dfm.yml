@@ -1,0 +1,41 @@
+train:
+  seed: 42
+  max_iter: 100000
+  batch_size: 256
+  log_freq: 50
+  val_freq: 500
+  save_freq: 5000
+  max_grad_norm: 100.
+  optimizer:
+    type: adam
+    lr: 3.e-4
+    weight_decay: 0.
+    beta1: 0.9
+    beta2: 0.999
+  scheduler:
+    type: plateau
+    factor: 0.5
+    patience: 10
+    min_lr: 1.e-4
+
+datasets:
+  type: toy_dfm
+  root: ./data
+  manifold: sphere
+  probs: [0.5, 0.5]
+  toy_seq_len: 100
+  toy_simplex_dim: 2
+
+model:
+  type: sphere
+  data_dims: [ 100 ]
+  n_class: 2
+  ot: false
+encoder:
+  type: v_mlp
+
+conditioned: false
+visualizer:
+  type: toy_dfm
+  n_sample: 100
+  n_step: 200

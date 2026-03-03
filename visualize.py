@@ -21,6 +21,18 @@ def get_vis(cfg, writer, device):
     v_type = v_cfg.pop('type')
     return _VIS_DICT[v_type](writer, device, **v_cfg)
 
+@register_vis('toy_dfm')
+class ToyDFMVisualizer:
+    def __init__(self, writer, device, n_sample, n_step):
+        self.writer = writer
+        self.device = device
+        self.n_sample = n_sample
+        self.n_step = n_step
+
+    def __call__(self, model, method, global_step):
+        traj = model.sample(method, self.n_sample, self.n_step, self.device)
+        self.writer.add_image('sample', traj.argmax(-1).float().view(-1, 1, 10, 10), global_step)
+        return traj
 
 @register_vis('bmnist')
 class MNISTVisualizer:

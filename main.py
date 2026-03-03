@@ -39,9 +39,14 @@ if __name__ == '__main__':
     train_set, valid_set, test_set = get_dataset(config.datasets)
 
     # Dataloader
-    train_loader = DataLoader(train_set, batch_size=config.train.batch_size, shuffle=True, num_workers=16)
-    valid_loader = DataLoader(valid_set, batch_size=config.train.batch_size, shuffle=False, num_workers=8)
-    test_loader = DataLoader(test_set, batch_size=config.train.batch_size, shuffle=False, num_workers=8)
+    if config.datasets.type == 'toy_dfm':
+        train_loader = DataLoader(train_set, batch_size=config.train.batch_size,)
+        valid_loader = DataLoader(valid_set, batch_size=config.train.batch_size)
+        test_loader = DataLoader(test_set, batch_size=config.train.batch_size)
+    else:
+        train_loader = DataLoader(train_set, batch_size=config.train.batch_size, shuffle=True, num_workers=16)
+        valid_loader = DataLoader(valid_set, batch_size=config.train.batch_size, shuffle=False, num_workers=8)
+        test_loader = DataLoader(test_set, batch_size=config.train.batch_size, shuffle=False, num_workers=8)
 
     # Model
     print('Building model...')
@@ -74,7 +79,12 @@ if __name__ == '__main__':
         while True:
             model.train()
             epoch_losses = []
-            for x, *cond_args in train_loader:
+            for batch in train_loader:
+                if config.conditioned:
+                    x, *cond_args = batch
+                else:
+                    x = batch
+                    cond_args = []
                 # Training
                 x = x.to(args.device)
                 cond_args = recursive_to_device(cond_args, args.device)
