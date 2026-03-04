@@ -74,7 +74,6 @@ if __name__ == '__main__':
 
     def train():
         global global_step
-
         epoch = 0
         while True:
             model.train()
@@ -83,8 +82,12 @@ if __name__ == '__main__':
                 if config.conditioned:
                     x, *cond_args = batch
                 else:
-                    x = batch
-                    cond_args = []
+                    if isinstance(batch, (list, tuple)):
+                        x = batch[0]
+                        cond_args = batch[1:]
+                    else:
+                        x = batch
+                        cond_args = []
                 # Training
                 x = x.to(args.device)
                 cond_args = recursive_to_device(cond_args, args.device)
