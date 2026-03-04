@@ -31,7 +31,9 @@ class ToyDFMVisualizer:
 
     def __call__(self, model, method, global_step):
         traj = model.sample(method, self.n_sample, self.n_step, self.device)
-        self.writer.add_image('sample', traj.argmax(-1).float().view(-1, 1, 10, 10), global_step)
+        imgs = traj.argmax(-1).float().view(-1, 1, 10, 10)   # (N, C, H, W)
+        self.writer.add_images('sample', imgs, global_step, dataformats='NCHW')
+        # self.writer.add_image('sample', traj.argmax(-1).float().view(-1, 1, 10, 10), global_step)
         return traj
 
 @register_vis('bmnist')

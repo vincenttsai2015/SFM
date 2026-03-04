@@ -142,13 +142,24 @@ if __name__ == '__main__':
             total = config.get('valid_max_batch', None)
             if total is None:
                 total = len(dataloader)
-            for i, (x, *cond_args) in tqdm(enumerate(dataloader), total=total):
+
+            for i, batch in tqdm(enumerate(dataloader), total=total):
                 if i >= total:
                     break
+
+                # ✅ dataloader 可能回傳 (x, cond1, cond2, ...) 或只回傳 x
+                if isinstance(batch, (list, tuple)):
+                    x = batch[0]
+                    cond_args = batch[1:]
+                else:
+                    x = batch
+                    cond_args = ()
+
                 x = x.to(args.device)
                 cond_args = recursive_to_device(cond_args, args.device)
                 loss = model.get_loss(x, *cond_args)
                 val_losses.append(loss.item())
+
         val_loss = sum(val_losses) / len(val_losses)
         writer.add_scalar(f'{split}/loss', val_loss, global_step)
         print(f'Step {global_step} {split} loss {val_loss:.6f}')

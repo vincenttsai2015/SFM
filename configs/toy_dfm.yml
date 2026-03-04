@@ -24,15 +24,20 @@ datasets:
   manifold: sphere
   probs: [0.5, 0.5]
   toy_seq_len: 100
-  toy_simplex_dim: 2
+  toy_simplex_dim: 4
 
 model:
   type: sphere
   data_dims: [ 100 ]
-  n_class: 2
+  n_class: 4
   ot: false
 encoder:
-  type: v_mlp
+  type: mlp
+  alphabet_size: 4 # k
+  num_cls: 1
+  classifier: false
+  cls_expanded_simplex: false
+  cls_free_guidance: false
 
 conditioned: false
 visualizer:
