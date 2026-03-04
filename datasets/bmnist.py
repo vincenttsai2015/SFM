@@ -34,7 +34,7 @@ class BinaryMNIST(Dataset):
         x = torch.stack([x, 1 - x], dim=-1)
         if self.transform is not None:
             x = self.transform(x)
-        return x
+        return (x,)
 
     def __len__(self):
         return self.data.size(0)
