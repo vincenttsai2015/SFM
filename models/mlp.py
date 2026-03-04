@@ -103,6 +103,7 @@ class DVFMMLP(nn.Module):
 def project_tangent_simplex(v):
     return v - v.mean(dim=-1, keepdim=True)
 
+@register_model('dirichlet_mlp')
 class DirichletModeClassifier(nn.Module):
     """
     For dirichlet FM classification:
