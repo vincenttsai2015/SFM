@@ -31,8 +31,8 @@ model:
 encoder:
   type: gpt
   vocab_size: 27
-  n_layer: 12
-  n_head: 8
+  n_layer: 6
+  n_head: 6
   n_embd: 384
   dropout: 0.0
   skip: True

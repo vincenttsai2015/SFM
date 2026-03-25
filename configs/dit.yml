@@ -32,12 +32,12 @@ model:
   ot: false
 encoder:
   type: dit
-  hidden_size: 768
-  cond_dim: 128
+  hidden_size: 384
+  cond_dim: 64
   vocab_size: 27
   length: 256
-  n_blocks: 12
-  n_heads: 12
+  n_blocks: 6
+  n_heads: 6
   dropout: 0.1
 
 sample:
