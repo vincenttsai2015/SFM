@@ -22,7 +22,7 @@ train:
 
 datasets:
   type: bmnist
-  root: ./data/bmnist
+  root: ./data
 
 model:
   type: sphere
