@@ -29,7 +29,7 @@ class BinaryMNIST(Dataset):
         img = img.squeeze(0) # (28, 28)
         img = torch.stack([img, 1 - img], dim=-1)  # (H, W, 2)
         if self.flatten:
-            img = img.reshape(img.shape[0] * img.shape[1]).long()  # (H*W, )
+            img = img.reshape(img.shape[0] * img.shape[1], 2).long()  # (H*W, 2)
         return img, label
 
 # class BinaryMNIST(Dataset):

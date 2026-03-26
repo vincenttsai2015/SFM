@@ -24,11 +24,24 @@ datasets:
 
 model:
   type: sphere
-  data_dims: [ 28, 28 ]
+  data_dims: [ 784 ]
   n_class: 2
   ot: true
 encoder:
   type: cnn
+  k: 2
+  dim: 784
+  num_cls: 10
+  hidden: 128
+  mode: simplex
+  depth: 2
+  dropout: 0.0
+  prior_pseudocount: 2.0
+  cls_expanded_simplex: false
+  clean_data: false
+  classifier: false
+  classifier_free_guidance: false
+  activation: relu
 
 conditioned: false
 visualizer:
