@@ -68,7 +68,6 @@ pip install pytabix pyBigWig pyfaidx pandas
 
 
 ## Usage
-
 Our implementation is designed to be flexible and easy to use. As demonstrated [above](#stand-alone-installation), you can easily incorporate SFM into your own project by defining a vector field encoder. An arbitrary number of conditional arguments can also be passed to the encoder. Below we document the main methods of the SFM class.
 
 - Manifold operations
@@ -87,21 +86,26 @@ Our implementation is designed to be flexible and easy to use. As demonstrated [
 
 We also provide an implementation for the naive SFM that directly learns the vector field without the diffeomorphism in `SimpleCategoricalFlow` and a linear flow matching model that assumes a flat Euclidean geometry of the simplex in `LinearCategoricalFlow`. The interfaces are identical to `SphereCategoricalFlow`. More concrete examples can be found in [Notebook](#notebook).
 
+## Training
 To train the model with the provided training script (binarized MNIST as an example), you can use the following command:
 ```bash
-python main.py configs/bmnist.yaml --savename bmnist
+python main.py configs/bmnist.yml --mode train --savename bmnist_train
 ```
 Most arguments in the config file are self-explanatory, and the config files for other tasks are provided under the `configs` directory. Feel free to modify them to suit your needs.
 To train the model using multiple GPUs, make sure you have pytorch-lightning properly installed following the [instructions](#installation-with-pytorch-lightning) above, and run the following command:
 
 ```bash
-python main_lightning.py configs/dit.yaml --savename text8_dit
+python main_lightning.py configs/dit.yml --savename text8_dit
+```
+## Inference
+To conduct inference from the trained model (binarized MNIST as an example), you can use the following command:
+```bash
+python main.py configs/bmnist.yml --mode train --mode inf --resume ~/SFM/logs/bmnist/100000.pt --savename bmnist_inference
 ```
 
 Note that the DiT model for Text8 uses [flash attention](https://github.com/Dao-AILab/flash-attention) and is hardcoded for `bf16` training. A `torch >= 2.0` is required to run the model. Some older NVIDIA GPUs and older versions of CUDA drivers may not support `bf16` training.
 
 ## Notebook
-
 We provide several notebooks to demonstrate the usage of SFM on different datasets. To run these notebooks, make sure Jupyter Notebook or JupyterLab is properly installed. Also, install `plotly` for interactive plots using `pip install plotly`.
 
 #### `vis_simplex.ipynb`
