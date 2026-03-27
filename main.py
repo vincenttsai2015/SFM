@@ -242,7 +242,7 @@ if __name__ == '__main__':
 
                 fid = get_fid(img, args.device, batch_size=config.train.batch_size)
                 print(f'FID: {fid:.4f}')
-                cal_elbo(model, test_set, max_sample=total_sample, batch_size=config.train.batch_size, method='ode', n_step=500, tmax=0.995, device=args.device)
+                cal_elbo(model, test_set, max_sample=total_sample, batch_size=config.train.batch_size, method='ode', n_step=200, tmax=0.9, device=args.device)
         time.sleep(3)  # Wait for the last tensorboard logs to be written
     except KeyboardInterrupt:
         print('Terminating...')

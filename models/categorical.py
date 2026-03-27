@@ -436,9 +436,10 @@ class CategoricalFlow(nn.Module, ABC):
         state0 = odeint(
             nll_fn,
             state1,
-            t=torch.linspace(tmax, tmin, 2, device=device, dtype=torch.float),
-            atol=1e-4,
-            rtol=1e-4,
+            t=torch.linspace(tmax, tmin, n_steps, device=device, dtype=torch.float),
+            method='rk4',
+            # atol=1e-4,
+            # rtol=1e-4,
         )[-1]
 
         p0 = self.postprocess(self.proj_x(state0[..., :-1]))
