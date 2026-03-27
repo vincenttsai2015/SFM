@@ -207,7 +207,7 @@ if __name__ == '__main__':
             if args.resume is None: 
                 print('[WARNING]: inference mode without loading a pretrained model')
                 
-            elif args.datasets.type == 'bmnist':
+            elif config.dataset.type == 'bmnist':
                 print('Loading model for inference...')
                 ckpt = torch.load(args.resume, map_location=args.device)
                 model.load_state_dict(ckpt['model'])
@@ -243,7 +243,7 @@ if __name__ == '__main__':
                 print(f'FID: {fid:.4f}')
                 cal_elbo(model, test_set, max_sample=total_sample, batch_size=config.train.batch_size, method='ode', n_step=200, tmax=0.9, device=args.device)
             
-            elif args.datasets.type == 'toy_dfm':
+            elif config.dataset.type == 'toy_dfm':
                 ckpt = torch.load(args.resume, map_location=args.device)
                 model.load_state_dict(ckpt['model'])
                 model.eval()
