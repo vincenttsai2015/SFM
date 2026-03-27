@@ -249,7 +249,10 @@ if __name__ == '__main__':
                 model.eval()
                 print('Model loading complete!')
                 total_sample = len(test_set)
-                cal_elbo(model, test_set, max_sample=total_sample, batch_size=config.train.batch_size, method='ode', n_step=200, tmax=0.9, device=args.device)
+                for samples, *_ in tqdm(test_loader):
+                    print(f'samples.shape: {samples.shape}')
+                    nll = model.compute_elbo('ode', samples, n_steps=200, tmax=0.995, verbose=True)
+                    print(f'NLL: {nll}')
 
             time.sleep(3)  # Wait for the last tensorboard logs to be written
         else:
