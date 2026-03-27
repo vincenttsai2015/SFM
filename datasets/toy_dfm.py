@@ -1,3 +1,5 @@
+import os
+import numpy as np
 import torch
 from torch import Tensor, nn
 from torch.utils.data import DataLoader, Dataset, IterableDataset
@@ -28,3 +30,39 @@ class ToyDataset(IterableDataset):
             one_hot = nn.functional.one_hot(sample, self.alphabet_size).float()
             # if there is a need to smooth labels, it is done in the model's training step
             yield one_hot.reshape((self.seq_len, self.alphabet_size))
+
+# class ToyDataset(IterableDataset):
+#     """
+#     Adapted from `https://github.com/HannesStark/dirichlet-flow-matching/blob/main/utils/dataset.py`.
+#     """
+#     def __init__(self, root, split, manifold, toy_seq_len: int, toy_simplex_dim: int, sz: int = 100_000):
+#         super().__init__()
+#         self.root = root
+#         self.split = split
+#         self.m = manifold
+#         self.sz = sz
+#         self.seq_len = toy_seq_len
+#         self.alphabet_size = toy_simplex_dim
+#         self.probs = torch.softmax(torch.rand((self.sz, self.seq_len, self.alphabet_size)), dim=2)
+
+#     def __len__(self) -> int:
+#         return self.sz
+
+#     def __iter__(self):
+#         while True:
+#             sample = torch.multinomial(replacement=True, num_samples=self.seq_len, input=self.probs).squeeze()
+#             one_hot = nn.functional.one_hot(sample, self.alphabet_size).float()
+#             if there is a need to smooth labels, it is done in the model's training step
+#             yield one_hot.reshape((self.seq_len, self.alphabet_size))
+            
+#             cls = np.random.choice(self.num_cls, p=self.class_probs)
+
+#             seq = []
+#             for i in range(self.seq_len):
+#                 token = torch.multinomial(input=self.probs[cls, i, :], num_samples=1, replacement=True)
+#                 seq.append(token)
+
+#             seq = torch.cat(seq)
+#             seq = torch.nn.functional.one_hot(seq, num_classes=self.alphabet_size).float() # for SFM
+
+#             yield seq, cls

@@ -210,7 +210,7 @@ class CategoricalFlow(nn.Module, ABC):
         return cls.exp(p, t.unsqueeze(-1) * cls.log(p, q, eps), eps)
 
     @classmethod
-    def vecfield(cls, p, q, t, eps=0.) -> (Tensor, Tensor):
+    def vecfield(cls, p, q, t, eps=0.):
         """
         Vector field at timestep t.
         :param p: source data point, Tensor of shape (..., n)

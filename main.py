@@ -8,6 +8,7 @@ from torch.nn.utils import clip_grad_norm_
 import torch.utils.tensorboard
 from torch.utils.data import DataLoader
 from torch.utils.tensorboard import SummaryWriter
+from torch.distributions import Dirichlet
 
 from models import get_flow_model
 from datasets import get_dataset
@@ -31,8 +32,6 @@ def cal_elbo(model, dataset, max_sample=1000, batch_size=100, method='ode', n_st
             print(f'NLL: {sum(nlls) / len(nlls):.4f}')
     nlls = np.array(nlls)
     print(f'Avg NLL: {nlls.mean():.4f} ± {nlls.std():.4f}')
-
-
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
