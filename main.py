@@ -188,7 +188,6 @@ if __name__ == '__main__':
         print(f'Step {global_step} {split} loss {val_loss:.6f}')
         return val_loss
 
-
     def sample(method='euler', split='valid', max_batch=config.train.batch_size):
         with torch.no_grad():
             model.eval()
@@ -198,7 +197,7 @@ if __name__ == '__main__':
                 dataloader = valid_loader if split == 'valid' else test_loader
                 traj = visualizer(model, dataloader, method, global_step, max_batch=max_batch)
         return traj
-
+    
     try:
         if args.mode == 'train':
             train()
@@ -206,43 +205,43 @@ if __name__ == '__main__':
             sample('ode', 'valid', None)
             print('Sampling finished!')
         if args.mode == 'inf': 
-            if args.resume is None: print('[WARNING]: inference mode without loading a pretrained model')
-            else:
-                print('Loading model for inference...')
-                ckpt = torch.load(args.resume, map_location=args.device)
-                model.load_state_dict(ckpt['model'])
-                model.eval()
-                print('Model loading complete!')
-                samples = []
-                total_sample = len(test_set)
-                n_batch = total_sample // config.train.batch_size
-                with torch.no_grad():
-                    for _ in tqdm(range(n_batch)):
-                        s = model.sample('ode', n_sample=config.train.batch_size, n_steps=300, device=args.device)
-                        samples.append(s.detach().cpu())
-                    samples = torch.cat(samples)
-                    img = (samples[..., 0] > samples[..., 1]).float().view(-1, 1, 28, 28).expand(-1, 3, -1, -1)
-                    print(f'Generated samples shape: {img.shape}')
+            if args.datasets.type == 'bmnist':
+                if args.resume is None: print('[WARNING]: inference mode without loading a pretrained model')
+                else:
+                    print('Loading model for inference...')
+                    ckpt = torch.load(args.resume, map_location=args.device)
+                    model.load_state_dict(ckpt['model'])
+                    model.eval()
+                    print('Model loading complete!')
+                    samples = []
+                    total_sample = len(test_set)
+                    n_batch = total_sample // config.train.batch_size
+                    with torch.no_grad():
+                        for _ in tqdm(range(n_batch)):
+                            s = model.sample('ode', n_sample=config.train.batch_size, n_steps=300, device=args.device)
+                            samples.append(s.detach().cpu())
+                        samples = torch.cat(samples)
+                        img = (samples[..., 0] > samples[..., 1]).float().view(-1, 1, 28, 28).expand(-1, 3, -1, -1)
+                        print(f'Generated samples shape: {img.shape}')
+                    # sample('ode', 'test', None)
+                    print('Sampling finished!')
+                    
+                    print('Calculating FID...')
+                    gt = []
+                    for samples, *_ in tqdm(test_loader):
+                        img = (samples[..., 0] > samples[..., 1]).float().view(-1, 1, 28, 28).expand(-1, 3, -1, -1)
+                        gt.append(img)
+                    gt = torch.cat(gt, dim=0)
+                    block_idx = InceptionV3.BLOCK_INDEX_BY_DIM[2048]
+                    inception = InceptionV3([block_idx]).to(args.device)
+                    inception.eval()
+                    mu, sigma = calculate_activation_statistics(gt, inception, args.device, batch_size=256)
+                    np.savez('bmnist_fid.npz', mu=mu, sigma=sigma)
+                    print('Done! Statistics saved to bmnist_fid.npz')
 
-                # sample('ode', 'test', None)
-                print('Sampling finished!')
-                
-                print('Calculating FID...')
-                gt = []
-                for samples, *_ in tqdm(test_loader):
-                    img = (samples[..., 0] > samples[..., 1]).float().view(-1, 1, 28, 28).expand(-1, 3, -1, -1)
-                    gt.append(img)
-                gt = torch.cat(gt, dim=0)
-                block_idx = InceptionV3.BLOCK_INDEX_BY_DIM[2048]
-                inception = InceptionV3([block_idx]).to(args.device)
-                inception.eval()
-                mu, sigma = calculate_activation_statistics(gt, inception, args.device, batch_size=256)
-                np.savez('bmnist_fid.npz', mu=mu, sigma=sigma)
-                print('Done! Statistics saved to bmnist_fid.npz')
-
-                fid = get_fid(img, args.device, batch_size=config.train.batch_size)
-                print(f'FID: {fid:.4f}')
-                cal_elbo(model, test_set, max_sample=total_sample, batch_size=config.train.batch_size, method='ode', n_step=200, tmax=0.9, device=args.device)
-        time.sleep(3)  # Wait for the last tensorboard logs to be written
+                    fid = get_fid(img, args.device, batch_size=config.train.batch_size)
+                    print(f'FID: {fid:.4f}')
+                    cal_elbo(model, test_set, max_sample=total_sample, batch_size=config.train.batch_size, method='ode', n_step=200, tmax=0.9, device=args.device)
+            time.sleep(3)  # Wait for the last tensorboard logs to be written
     except KeyboardInterrupt:
         print('Terminating...')
