@@ -47,7 +47,9 @@ def estimate_toy_kl(model, dataloader, probs, seq_len, method='ode', n_steps=200
     total_elbo_nll = 0.0
     total_count = 0
 
-    for batch in dataloader:
+    total_sz = len(dataloader)
+
+    for i, batch in tqdm(enumerate(dataloader), total=total_sz):
         batch = batch.to(device)   # shape: (B, seq_len, simplex_dim)
 
         # one-hot data on simplex boundary -> use ELBO, not direct NLL
