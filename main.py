@@ -33,6 +33,44 @@ def cal_elbo(model, dataset, max_sample=1000, batch_size=100, method='ode', n_st
     nlls = np.array(nlls)
     print(f'Avg NLL: {nlls.mean():.4f} ± {nlls.std():.4f}')
 
+def toy_data_entropy(probs, seq_len, eps=1e-12):
+    probs = torch.as_tensor(probs, dtype=torch.float32)
+    probs = probs / probs.sum()
+    h = -(probs * (probs + eps).log()).sum()
+    return seq_len * h
+
+@torch.no_grad()
+def estimate_toy_kl(model, dataloader, probs, seq_len, method='ode', n_steps=200, tmax=0.995, device='cuda'):
+    model.eval()
+    H_data = toy_data_entropy(probs, seq_len).to(device)
+
+    total_elbo_nll = 0.0
+    total_count = 0
+
+    for batch in dataloader:
+        batch = batch.to(device)   # shape: (B, seq_len, simplex_dim)
+
+        # one-hot data on simplex boundary -> use ELBO, not direct NLL
+        elbo_nll = model.compute_elbo(
+            method=method,
+            p1=batch,
+            n_steps=n_steps,
+            tmax=tmax,
+            verbose=False
+        )
+
+        bsz = batch.size(0)
+        total_elbo_nll += elbo_nll.item() * bsz
+        total_count += bsz
+
+    avg_elbo_nll = total_elbo_nll / total_count
+    kl_est = avg_elbo_nll - H_data.item()
+    return {
+        "avg_elbo_nll": avg_elbo_nll,
+        "data_entropy": H_data.item(),
+        "kl_data_model": kl_est,
+    }
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('config', type=str)
@@ -248,11 +286,20 @@ if __name__ == '__main__':
                 model.load_state_dict(ckpt['model'])
                 model.eval()
                 print('Model loading complete!')
-                total_sample = len(test_set)
-                for samples, *_ in tqdm(test_loader):
-                    print(f'samples.shape: {samples.shape}')
-                    nll = model.compute_elbo('ode', samples, n_steps=200, tmax=0.995, verbose=True)
-                    print(f'NLL: {nll}')
+                stats = estimate_toy_kl(
+                    model=model,
+                    dataloader=test_loader,
+                    probs=test_loader.dataset.probs,
+                    seq_len=test_loader.dataset.seq_len,
+                    method='ode',
+                    n_steps=200,
+                    tmax=0.99,
+                    device=args.device,
+                )
+
+                print("ELBO-NLL:", stats["avg_elbo_nll"])
+                print("H(data):", stats["data_entropy"])
+                print("KL(data || model):", stats["kl_data_model"])
 
             time.sleep(3)  # Wait for the last tensorboard logs to be written
         else:
